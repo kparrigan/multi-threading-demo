@@ -1,5 +1,4 @@
-﻿using MultiThreadingDemo.Data;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MultiThreadingDemo.Data;
 
 namespace MultiThreadingDemo.Processor
 {
@@ -34,14 +34,14 @@ namespace MultiThreadingDemo.Processor
         /// Current working set of entities to process.
         /// </summary>
         protected ConcurrentDictionary<Guid, Boolean> WorkingSet { get; set; }
-        #endregion
 
-        #region Constructor
         /// <summary>
         /// Cancellation token.
         /// </summary>
-        protected CancellationTokenSource CancellationSource {get; set; }
+        protected CancellationTokenSource CancellationSource { get; set; }
+        #endregion
 
+        #region Constructor
         /// <summary>
         /// Instantiates a new instance of the <see cref="BaseProcessor" class./>
         /// </summary>
@@ -49,6 +49,11 @@ namespace MultiThreadingDemo.Processor
         /// <param name="pollingIntervalMinutes">Polling interval.</param>
         public BaseProcessor(IMultiThreadingDemoDal dataAccessLayer, Int32 pollingIntervalMinutes)
         {
+            if (dataAccessLayer == null)
+            {
+                throw new ArgumentNullException("dataAccessLayer");
+            }
+
             Dal = dataAccessLayer;
             _pollingIntervalMinutes = pollingIntervalMinutes;
         }
@@ -74,11 +79,10 @@ namespace MultiThreadingDemo.Processor
         }
         #endregion
 
-        #region Constructor
-
-        #endregion
-
         #region Private Methods
+        /// <summary>
+        /// Polling loop for processor.
+        /// </summary>
         private void Poll()
         {
             var token = CancellationSource.Token;
@@ -96,6 +100,9 @@ namespace MultiThreadingDemo.Processor
         #endregion
 
         #region Abstract
+        /// <summary>
+        /// Abstract method for retrieving entities.
+        /// </summary>
         protected abstract void RetrieveEntities();
         #endregion
     }

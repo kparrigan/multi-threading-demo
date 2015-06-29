@@ -43,7 +43,6 @@ namespace ThreadPoolDemo.Processor
         #endregion
 
         #region Private Methods
-
         /// <summary>
         /// Initializes the working set and polling variables.
         /// </summary>
@@ -103,42 +102,43 @@ namespace ThreadPoolDemo.Processor
         {
             var entity = threadContext as DataEntity;
 
-            if (entity != null)
+            if (entity == null)
             {
-                var id = entity.Id;
-
-                try
-                {
-                    Dal.UpdateEntity(id, ProcessingStatus.Processing);
-                    
-                    if (!WorkingSet.TryUpdate(id, true, false))
-                    {
-                        Trace.WriteLine(String.Format("Error updating working set for entity {0}.", id));
-                    }
-
-                    Trace.WriteLine(String.Format("Processing entity: {0}", id));
-                    var processingSleepTime = _processingTime.Next(1, _maxProcessingSeconds);
-                    Thread.Sleep(TimeSpan.FromSeconds(processingSleepTime));
-                    Dal.UpdateEntity(id, ProcessingStatus.Complete);
-
-                    bool removed;
-                    if (!WorkingSet.TryRemove(id, out removed))
-                    {
-                        Trace.WriteLine(String.Format("Error removing entity {0} from working set.", id));
-                    }
-
-                    Trace.WriteLine(String.Format("Processing Complete for entity: {0}", id));
-                    Trace.WriteLine(String.Format("Current working set size: {0}", WorkingSet.Count));
-                }
-                catch (SqlException ex)
-                {
-                    Trace.TraceError(String.Format("Error processing entity {0}: {1}", id, ex.StackTrace));
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError(String.Format("Error processing entity {0}: {1}", id, ex.StackTrace));
-                }
+                throw new ArgumentNullException("threadContext");
             }
+
+            var id = entity.Id;
+
+            try
+            {
+                Dal.UpdateEntity(id, ProcessingStatus.Processing);
+                    
+                if (!WorkingSet.TryUpdate(id, true, false))
+                {
+                    Trace.WriteLine(String.Format("Error updating working set for entity {0}.", id));
+                }
+
+                Trace.WriteLine(String.Format("Processing entity: {0}", id));
+                var processingSleepTime = _processingTime.Next(1, _maxProcessingSeconds);
+                Thread.Sleep(TimeSpan.FromSeconds(processingSleepTime));
+                Dal.UpdateEntity(id, ProcessingStatus.Complete);
+
+                bool removed;
+                if (!WorkingSet.TryRemove(id, out removed))
+                {
+                    Trace.WriteLine(String.Format("Error removing entity {0} from working set.", id));
+                }
+
+                Trace.WriteLine(String.Format("Processing Complete for entity: {0}", id));
+            }
+            catch (SqlException ex)
+            {
+                Trace.TraceError(String.Format("Error processing entity {0}: {1}", id, ex.StackTrace));
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(String.Format("Error processing entity {0}: {1}", id, ex.StackTrace));
+            }            
         }
         #endregion
     }
