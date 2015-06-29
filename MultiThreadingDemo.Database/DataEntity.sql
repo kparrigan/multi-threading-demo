@@ -1,0 +1,5 @@
+﻿CREATE TABLE [dbo].[DataEntity]
+(
+	[Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY, 
+    [ProcessingStatus] NVARCHAR(50) NOT NULL
+)
